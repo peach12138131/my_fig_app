@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY Figure LAB</title>
+    <link rel="icon" type="image/jpeg" href="/static/images/Icon.jpg">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="hero-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1>MY Figure LAB</h1>
+                <p class="subtitle">Scientific Image Generation Platform</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-navigation">
+        <button class="tab-button active" data-tab="generate">
+            Generate
+        </button>
+        <button class="tab-button" data-tab="gallery">
+            Gallery
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Generate Image Tab -->
+        <section id="generate-tab" class="tab-content active">
+            <div class="content-grid">
+                <!-- Left Panel: Form -->
+                <div class="panel-card left-panel">
+                    <h2 class="panel-title">图片生成</h2>
+                    <form id="generateForm">
+                        <div class="form-group">
+                            <label for="prompt">生成提示词 *</label>
+                            <textarea
+                                id="prompt"
+                                name="prompt"
+                                rows="4"
+                                placeholder="描述你想生成的图片...例如：一只在星空下的猫咪"
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="folderType">子文件夹名称 *</label>
+                            <input
+                                type="text"
+                                id="folderType"
+                                name="folderType"
+                                placeholder="例如: portraits, landscapes"
+                                required
+                            >
+                            <small class="hint">用于分类保存生成的图片</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imageSize">图片尺寸</label>
+                            <select id="imageSize" name="imageSize">
+                                <option value="2K" selected>2K (标准质量)</option>
+                                <option value="4K">4K (高质量)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="referenceImages">参考图片（可选，最多5张）</label>
+                            <div class="file-upload-area">
+                                <input
+                                    type="file"
+                                    id="referenceImages"
+                                    name="referenceImages"
+                                    accept="image/*"
+                                    multiple
+                                >
+                                <div class="file-upload-label">
+                                    <span class="upload-icon">📁</span>
+                                    <span class="upload-text">点击选择或拖拽文件</span>
+                                </div>
+                            </div>
+                            <div id="filePreview" class="file-preview"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="generateBtn">
+                            <span class="btn-text">生成图片</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right Panel: Preview -->
+                <div class="panel-card right-panel">
+                    <h2 class="panel-title">预览</h2>
+                    <div id="imagePreview" class="image-preview">
+                        <img src="/static/images/Placeholder.jpg" alt="预览占位符" class="placeholder-image">
+                        <p class="preview-hint">图片生成后将在此显示</p>
+                    </div>
+                    <div id="generateStatus" class="status-box"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Tab -->
+        <section id="gallery-tab" class="tab-content">
+            <div class="content-grid gallery-layout">
+                <!-- Left Sidebar: Controls -->
+                <div class="panel-card sidebar-panel">
+                    <h2 class="panel-title">相册控制</h2>
+
+                    <div class="form-group">
+                        <label for="galleryFolder">子文件夹名称</label>
+                        <input
+                            type="text"
+                            id="galleryFolder"
+                            name="galleryFolder"
+                            placeholder="例如: portraits"
+                        >
+                    </div>
+
+                    <button class="btn btn-secondary" id="loadGalleryBtn">
+                        <span class="btn-text">加载相册</span>
+                    </button>
+
+                    <button class="btn btn-accent" id="downloadOriginalsBtn">
+                        <span class="btn-text">下载所有原图</span>
+                    </button>
+
+                    <div id="galleryStatus" class="status-box"></div>
+                </div>
+
+                <!-- Right Panel: Gallery Grid -->
+                <div class="panel-card gallery-panel">
+                    <h2 class="panel-title">图片相册</h2>
+                    <div id="galleryGrid" class="gallery-grid">
+                        <div class="empty-state">
+                            <img src="/static/images/Placeholder.jpg" alt="空状态" class="empty-image">
+                            <p>输入文件夹名称并加载相册</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <p>Powered by AVI-GO AI INSIGHT</p>
+            <p class="footer-note">Scientific Intelligence for Research Excellence</p>
+        </div>
+    </footer>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImage">
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
