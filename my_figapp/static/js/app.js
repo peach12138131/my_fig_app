@@ -132,14 +132,39 @@ function initGenerateForm() {
             UI.setButtonLoading(generateBtn, true);
             UI.showLoading(statusElement, '正在生成图片，请稍候...');
 
-            // 重置预览
+            // 显示进度条
             previewContainer.innerHTML = `
-                <img src="/static/images/Placeholder.jpg" alt="生成中" class="placeholder-image">
-                <p class="preview-hint">图片生成中，请耐心等待...</p>
+                <img src="/static/images/Placeholder.jpg" alt="生成中" class="placeholder-image" style="opacity: 0.6;">
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-text">正在生成图片...</span>
+                        <span class="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="progress-estimate" id="progressTimer">已用时：0 秒</p>
+                </div>
             `;
+
+            // 启动计时器和进度条
+            const startTime = Date.now();
+            const timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const timerElement = document.getElementById('progressTimer');
+                if (timerElement) {
+                    timerElement.textContent = `已用时：${elapsed} 秒`;
+                }
+            }, 1000);
+
+            const progressAnimation = UI.startProgressAnimation(70); // 预估70秒
 
             // 调用 API
             const result = await API.generateImage(formData);
+
+            // 停止计时器和进度条
+            clearInterval(timer);
+            UI.completeProgress(progressAnimation);
 
             if (result.success) {
                 // 显示生成的图片

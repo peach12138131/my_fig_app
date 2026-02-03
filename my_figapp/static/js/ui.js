@@ -253,5 +253,54 @@ const UI = {
             button.classList.remove('loading');
             button.disabled = false;
         }
+    },
+
+    /**
+     * 启动进度条动画
+     * @param {number} estimatedSeconds - 预估完成时间（秒）
+     * @returns {Object} 动画控制对象
+     */
+    startProgressAnimation(estimatedSeconds = 60) {
+        const progressFill = document.getElementById('progressFill');
+        const progressPercent = document.querySelector('.progress-percent');
+
+        if (!progressFill || !progressPercent) {
+            return { stop: () => {}, complete: () => {} };
+        }
+
+        let progress = 0;
+        const maxProgress = 90; // 最多到90%，剩下10%等API完成
+        const updateInterval = 200; // 每200ms更新一次
+        const totalUpdates = (estimatedSeconds * 1000) / updateInterval;
+        const progressPerUpdate = maxProgress / totalUpdates;
+
+        const interval = setInterval(() => {
+            if (progress < maxProgress) {
+                progress += progressPerUpdate;
+                const displayProgress = Math.min(Math.floor(progress), maxProgress);
+
+                progressFill.style.width = `${displayProgress}%`;
+                progressPercent.textContent = `${displayProgress}%`;
+            }
+        }, updateInterval);
+
+        return {
+            stop: () => clearInterval(interval),
+            complete: () => {
+                clearInterval(interval);
+                progressFill.style.width = '100%';
+                progressPercent.textContent = '100%';
+            }
+        };
+    },
+
+    /**
+     * 完成进度条
+     * @param {Object} progressAnimation - 进度动画对象
+     */
+    completeProgress(progressAnimation) {
+        if (progressAnimation && progressAnimation.complete) {
+            progressAnimation.complete();
+        }
     }
 };
