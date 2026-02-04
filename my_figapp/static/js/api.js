@@ -50,22 +50,22 @@ const API = {
     },
 
     /**
-     * 下载原图 ZIP
+     * 获取原图列表
      * @param {string} folderType - 文件夹名称
-     * @returns {Promise<Blob>}
+     * @returns {Promise<Object>}
      */
-    async downloadOriginals(folderType) {
+    async getOriginals(folderType) {
         try {
-            const response = await fetch(`/api/download-originals/${encodeURIComponent(folderType)}`);
+            const response = await fetch(`/api/originals/${encodeURIComponent(folderType)}`);
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || '下载失败');
+                throw new Error(errorData.error || '获取原图列表失败');
             }
 
-            return await response.blob();
+            return await response.json();
         } catch (error) {
-            console.error('Download originals error:', error);
+            console.error('Get originals error:', error);
             throw error;
         }
     },

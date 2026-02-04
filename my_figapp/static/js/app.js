@@ -205,18 +205,17 @@ function initGenerateForm() {
  */
 function initGallery() {
     const loadBtn = document.getElementById('loadGalleryBtn');
-    const downloadBtn = document.getElementById('downloadOriginalsBtn');
 
     loadBtn.addEventListener('click', handleLoadGallery);
-    downloadBtn.addEventListener('click', handleDownloadOriginals);
 
     /**
-     * 加载相册
+     * 加载相册和原图列表
      */
     async function handleLoadGallery() {
         const folderType = document.getElementById('galleryFolder').value.trim();
         const statusElement = document.getElementById('galleryStatus');
         const galleryGrid = document.getElementById('galleryGrid');
+        const originalsList = document.getElementById('originalsList');
 
         if (!folderType) {
             UI.showError(statusElement, '请输入子文件夹名称');
@@ -236,30 +235,49 @@ function initGallery() {
                 galleryGrid.appendChild(placeholder);
             }
 
-            // 调用 API
-            const result = await API.loadGallery(folderType);
+            // 并行加载相册和原图列表
+            const [galleryResult, originalsResult] = await Promise.all([
+                API.loadGallery(folderType),
+                API.getOriginals(folderType)
+            ]);
 
-            if (result.success) {
+            // 处理相册结果
+            if (galleryResult.success) {
                 galleryGrid.innerHTML = '';
 
-                if (result.images && result.images.length > 0) {
+                if (galleryResult.images && galleryResult.images.length > 0) {
                     // 渲染图片
-                    result.images.forEach(image => {
+                    galleryResult.images.forEach(image => {
                         const item = UI.createGalleryItem(image);
                         galleryGrid.appendChild(item);
                     });
 
-                    UI.showSuccess(statusElement, result.message);
-                    UI.showToast(`加载了 ${result.count} 张图片`, 'success');
+                    UI.showSuccess(statusElement, galleryResult.message);
+                    UI.showToast(`加载了 ${galleryResult.count} 张图片`, 'success');
                 } else {
                     // 空状态
                     galleryGrid.appendChild(
                         UI.createEmptyState('该文件夹中没有图片')
                     );
-                    UI.showInfo(statusElement, result.message || '文件夹为空');
+                    UI.showInfo(statusElement, galleryResult.message || '文件夹为空');
                 }
             } else {
-                throw new Error(result.error || '加载失败');
+                throw new Error(galleryResult.error || '加载失败');
+            }
+
+            // 处理原图列表结果
+            if (originalsResult.success) {
+                originalsList.innerHTML = '';
+
+                if (originalsResult.originals && originalsResult.originals.length > 0) {
+                    // 渲染原图列表
+                    originalsResult.originals.forEach(original => {
+                        const item = UI.createOriginalItem(original);
+                        originalsList.appendChild(item);
+                    });
+                } else {
+                    originalsList.innerHTML = '<p class="hint-text">该文件夹中没有原图</p>';
+                }
             }
 
         } catch (error) {
@@ -274,41 +292,6 @@ function initGallery() {
 
         } finally {
             UI.setButtonLoading(loadBtn, false);
-        }
-    }
-
-    /**
-     * 下载原图
-     */
-    async function handleDownloadOriginals() {
-        const folderType = document.getElementById('galleryFolder').value.trim();
-        const statusElement = document.getElementById('galleryStatus');
-
-        if (!folderType) {
-            UI.showError(statusElement, '请输入子文件夹名称');
-            return;
-        }
-
-        try {
-            UI.setButtonLoading(downloadBtn, true);
-            UI.showLoading(statusElement, '正在准备下载...');
-
-            // 调用 API
-            const blob = await API.downloadOriginals(folderType);
-
-            // 触发下载
-            UI.triggerDownload(blob, `${folderType}_originals.zip`);
-
-            UI.showSuccess(statusElement, '下载已开始！');
-            UI.showToast('开始下载原图', 'success');
-
-        } catch (error) {
-            console.error('Download error:', error);
-            UI.showError(statusElement, `下载失败: ${error.message}`);
-            UI.showToast('下载失败', 'error');
-
-        } finally {
-            UI.setButtonLoading(downloadBtn, false);
         }
     }
 }

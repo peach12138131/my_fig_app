@@ -169,9 +169,9 @@ def serve_image(folder_type, filename):
         return jsonify({'success': False, 'error': f'服务器错误: {str(e)}'}), 500
 
 
-@api_bp.route('/download-originals/<folder_type>', methods=['GET'])
-def download_originals(folder_type):
-    """下载原图 ZIP"""
+@api_bp.route('/originals/<folder_type>', methods=['GET'])
+def list_originals(folder_type):
+    """获取原图列表"""
     try:
         # 清理文件夹名称
         folder_type = sanitize_folder_type(folder_type)
@@ -187,21 +187,63 @@ def download_originals(folder_type):
         png_files = sorted(glob.glob(f"{output_dir}/*.png"), reverse=True)
 
         if not png_files:
-            return jsonify({'success': False, 'error': f'文件夹 {folder_type} 中没有原图'}), 404
+            return jsonify({
+                'success': True,
+                'originals': [],
+                'count': 0,
+                'message': f'文件夹 {folder_type} 中没有原图'
+            })
 
-        # 创建内存 ZIP 文件
-        memory_file = BytesIO()
-        with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for png_path in png_files:
-                zf.write(png_path, os.path.basename(png_path))
+        # 构建原图信息列表
+        originals = []
+        for png_path in png_files:
+            filename = os.path.basename(png_path)
+            file_size = os.path.getsize(png_path)
 
-        memory_file.seek(0)
+            # 格式化文件大小
+            if file_size < 1024:
+                size_str = f"{file_size} B"
+            elif file_size < 1024 * 1024:
+                size_str = f"{file_size / 1024:.1f} KB"
+            else:
+                size_str = f"{file_size / (1024 * 1024):.2f} MB"
+
+            originals.append({
+                'filename': filename,
+                'size': file_size,
+                'size_str': size_str,
+                'download_url': f'/api/download-original/{folder_type}/{filename}'
+            })
+
+        return jsonify({
+            'success': True,
+            'originals': originals,
+            'count': len(originals),
+            'message': f'找到 {len(originals)} 张原图'
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'服务器错误: {str(e)}'}), 500
+
+
+@api_bp.route('/download-original/<folder_type>/<filename>', methods=['GET'])
+def download_single_original(folder_type, filename):
+    """下载单个原图"""
+    try:
+        # 清理文件夹名称和文件名
+        folder_type = sanitize_folder_type(folder_type)
+        filename = secure_filename(filename)
+
+        output_dir = f"./fig_out/{folder_type}"
+        file_path = os.path.join(output_dir, filename)
+
+        if not os.path.exists(file_path):
+            return jsonify({'success': False, 'error': '文件不存在'}), 404
 
         return send_file(
-            memory_file,
-            mimetype='application/zip',
+            file_path,
             as_attachment=True,
-            download_name=f'{folder_type}_originals.zip'
+            download_name=filename
         )
 
     except Exception as e:

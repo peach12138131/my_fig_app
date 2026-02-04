@@ -188,6 +188,48 @@ const UI = {
     },
 
     /**
+     * 创建原图列表项
+     * @param {Object} original - 原图对象 {filename, size_str, download_url}
+     * @returns {HTMLElement}
+     */
+    createOriginalItem(original) {
+        const div = document.createElement('div');
+        div.className = 'original-item';
+
+        const icon = document.createElement('span');
+        icon.className = 'original-icon';
+        icon.textContent = '📄';
+
+        const info = document.createElement('div');
+        info.className = 'original-info';
+
+        const filename = document.createElement('div');
+        filename.className = 'original-filename';
+        filename.textContent = original.filename;
+        filename.title = original.filename;
+
+        const size = document.createElement('div');
+        size.className = 'original-size';
+        size.textContent = original.size_str;
+
+        info.appendChild(filename);
+        info.appendChild(size);
+
+        const downloadBtn = document.createElement('a');
+        downloadBtn.className = 'original-download';
+        downloadBtn.href = original.download_url;
+        downloadBtn.download = original.filename;
+        downloadBtn.textContent = '下载';
+        downloadBtn.title = '下载';
+
+        div.appendChild(icon);
+        div.appendChild(info);
+        div.appendChild(downloadBtn);
+
+        return div;
+    },
+
+    /**
      * 打开 Lightbox 查看大图
      * @param {string} imagePath - 图片路径
      * @param {string} caption - 图片说明
