@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+# Local config and data
+my_figapp/config.py
+my_figapp/log.txt
+my_figapp/app.pid
+my_figapp/fig_out/
+# 或者使用通配符
+*.pid
+*.log
+fig_out/
